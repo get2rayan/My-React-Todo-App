@@ -1,4 +1,11 @@
 # Node.js with React
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'Free Trial(d9e049f9-37df-4442-be00-e2a535baf9d6)'
+    appType: 'webApp'
+    appName: 'rayansReactTodoApp'
+    package: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    deploymentMethod: 'auto'
 # Build a Node.js project that uses React.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
