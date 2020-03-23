@@ -1,0 +1,8 @@
+{
+    "app":{
+        "name": "Prod React Todo App"
+    },
+    "db":{
+        "url": "https://rayansexpresserver.azurewebsites.net/api"
+    }
+}

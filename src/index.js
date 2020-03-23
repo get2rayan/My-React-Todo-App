@@ -2,10 +2,31 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 //import * as serviceWorker from './serviceWorker';
+import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
+import Test from './Test'
 
-ReactDOM.render(<App />, document.getElementById('root'));
+export default function NotFound() {
+    return (
+        <h1>Not Found</h1>
+    )
+}
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-//serviceWorker.unregister();
+const routing=
+    (
+        <Router>
+            <div>
+                <div><div>
+                    <Link to="/">TodoList</Link></div>
+                    <div>
+                    <Link to="/Test">Test</Link></div>
+                </div>
+            </div>
+            <Switch>
+                <Route exact path="/" component={App} />
+                <Route path="/test" component={Test} />
+                <Route component={NotFound} />
+            </Switch>
+        </Router>
+    )
+
+ReactDOM.render(routing, document.getElementById('root'));

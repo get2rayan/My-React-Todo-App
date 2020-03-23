@@ -1,14 +1,18 @@
 import React, {useState, useRef, useEffect} from 'react';
 import TodoList from './TodoList';
-import uuidv4 from 'uuid/v4'
+import API from './API'
+//import config from 'config'
 
 function App() {
   const LOCAL_STORAGE_KEY="todoApp.todos"
-  //const [todos, setTodo]=useState([{id:1, item: "Burger", complete:false}, {id: 2, item:"Coke", complete:true}]);
-  const [todos, setTodo]=useState(getTodos);
+  const [todos, setTodo]=useState(null)
+  const [requery, setRequery]=useState(false)
   const todoNameRef=useRef()
 
-  useEffect(()=> {
+  //console.log('Node env is : ' + config.util.getEnv('NODE_ENV'))
+
+  //#region "Local Data Store"
+  /*useEffect(()=> {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos))
   },[todos])
 
@@ -17,38 +21,64 @@ function App() {
         return(JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)))
       else
         return ([])    
+  }*/
+//#endregion "Local Data Store"
+  async function fetchTodos(){  
+    await API.get('todos').then((res)=>{
+      setTodo(res.data.todos)
+    })
   }
+
+  useEffect(()=>{  
+    fetchTodos()    
+  },[requery])
+
+//#region "API Service Data Store"
+ /*async function getTodos(){
+   return await API.get('todos').then((res)=>{
+     setTodo(res.data.todo)
+  })
+  //return ([{_id:1, item: "Burger", complete:false}])
+}*/
+//#endregion
 
   function toggleTodo(id){
     const currentTodos = [...todos]
-    const selTodo = currentTodos.find(todo=>todo.id===id)
+    const selTodo = currentTodos.find(todo=>todo._id===id)
     selTodo.complete=!selTodo.complete
     setTodo(currentTodos)
   }
 
-  function handleAdd(){
+  async function handleAdd(){    
     var todoItem=todoNameRef.current.value
     if(todoItem==='') return 
-//    console.log(todoItem)
-    setTodo(prevTodo => {
-      return ([...prevTodo, {id: uuidv4(), item: todoItem, complete:false}])
+    await API.post('todos', { item: todoItem, complete: false}).then(()=>{
+    // enable requery flag to trigger useEffect
+      setRequery(prevRequery=>!prevRequery)
     })
-    todoNameRef.current.value=null
+    todoNameRef.current.value=null    
   }
 
-  const handleClearComplete=()=>{
-    let currentTodos= [...todos]
-    currentTodos = currentTodos.filter(todo=>!todo.complete)
-    setTodo(currentTodos)
+   function handleClearComplete(){
+    let todoList = [...todos].filter(todo=>todo.complete)
+    if(todoList==null || todoList.length==0) return
+    todoList.forEach(todo=>{
+          API.delete('todos', {params: { id: todo._id }}).then(()=>{            
+            setRequery(prevRequery=>!prevRequery)
+        })
+      })      
   }
+    
   return (
-    <div className="App">
-      My TodoList
-      <TodoList todos={todos} toggleTodo={toggleTodo}/>
-      <input type={Text} ref={todoNameRef}></input>
-      <button onClick={handleAdd}>Add Todo</button>
-      <button onClick={handleClearComplete}>Clear Complete</button>
-    </div>
+      <div className="App">
+        <div>
+          My TodoList
+          <TodoList todos={todos} toggleTodo={toggleTodo}/>
+          <input type={Text} ref={todoNameRef}></input>
+          <button onClick={handleAdd}>Add Todo</button>
+          <button onClick={handleClearComplete}>Clear Complete</button>
+        </div>
+      </div>
   );
 }
 
